@@ -1,5 +1,9 @@
 import tkinter as tk  # Importa o Tkinter para criar a interface gráfica
 from tkinter import filedialog  # Importa o filedialog para abrir janelas de seleção de arquivos
+from tkinter import messagebox  # Importa messagebox para mostrar mensagens ao usuário
+from tkinter import ttk         # Importa ttk para a barra de progresso
+import subprocess  # Importa subprocess para executar comandos do sistema
+import threading   # Importa threading para não travar a interface
 
 # Cria a janela principal
 root = tk.Tk()
@@ -35,6 +39,52 @@ tk.Button(root, text="🔍", command=selecionar_arquivo).grid(row=0, column=2, p
 tk.Label(root, text="Destino do Executável:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
 tk.Entry(root, textvariable=caminho_destino, width=40).grid(row=1, column=1, padx=5, pady=5)
 tk.Button(root, text="🔍", command=selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
+
+# Barra de progresso
+progress = ttk.Progressbar(root, orient="horizontal", length=400, mode="indeterminate")
+progress.grid(row=3, column=0, columnspan=3, padx=5, pady=10)
+
+# Caixa de texto para logs
+log_text = tk.Text(root, height=8, width=60)
+log_text.grid(row=4, column=0, columnspan=3, padx=5, pady=5)
+
+# Função para compilar o arquivo Python selecionado (em thread)
+def compilar():
+    arquivo = caminho_arquivo.get()      # Obtém o caminho do arquivo .py
+    destino = caminho_destino.get()      # Obtém o caminho da pasta de destino
+    if not arquivo or not destino:
+        tk.messagebox.showerror("Erro", "Selecione o arquivo Python e o destino!")  # Mostra erro se faltar algum campo
+        return
+    comando = [
+        "pyinstaller",
+        "--onefile",
+        "--noconsole",                   # Não abre janela preta ao executar o .exe gerado
+        "--distpath", destino,           # Define a pasta de destino do executável
+        arquivo
+    ]
+    progress.start()                     # Inicia a barra de progresso
+    log_text.delete(1.0, tk.END)         # Limpa o log
+    try:
+        processo = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        for linha in processo.stdout:
+            log_text.insert(tk.END, linha)
+            log_text.see(tk.END)
+        processo.wait()
+        progress.stop()                  # Para a barra de progresso
+        if processo.returncode == 0:
+            messagebox.showinfo("Sucesso", "Compilação finalizada com sucesso!")  # Mostra mensagem de sucesso
+        else:
+            messagebox.showerror("Erro", "Ocorreu um erro durante a compilação.") # Mostra mensagem de erro
+    except Exception as e:
+        progress.stop()
+        messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
+
+# Função para rodar a compilação em thread
+def compilar_thread():
+    threading.Thread(target=compilar).start()
+
+# Botão para compilar
+tk.Button(root, text="Compilar", command=compilar_thread).grid(row=2, column=1, pady=15)
 
 # Inicia o loop principal da interface
 root.mainloop()

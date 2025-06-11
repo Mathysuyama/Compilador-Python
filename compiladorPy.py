@@ -4,39 +4,66 @@ from tkinter import filedialog   # Importa o filedialog para abrir janelas de se
 from tkinter import ttk          # Importa o ttk para widgets modernos do tkinter
 from tkinter import messagebox   # Importa o messagebox para mostrar diálogos de mensagem
 import threading                 # Importa threading para rodar a compilação em paralelo à interface
+import sys                       # Importa sys para acessar informações do sistema operacional
+import os                        # Importa os para manipulação de caminhos
 
 class CompiladorApp:
     def __init__(self, master):
         self.master = master
         master.title("Compilador Python para Executável")  # Define o título da janela
 
+        # Frame principal para os controles do compilador
+        frame_principal = tk.Frame(master)                 # Cria o frame principal para os controles
+        frame_principal.pack(side=tk.LEFT, padx=10, pady=10)  # Posiciona à esquerda
+
+        # Frame lateral para instruções de uso
+        frame_ajuda = tk.Frame(master, relief=tk.GROOVE, borderwidth=2)  # Cria o frame de ajuda com borda
+        frame_ajuda.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)      # Posiciona à direita do principal
+
         # Variáveis para armazenar caminhos
         self.caminho_arquivo = tk.StringVar()              # Variável para o caminho do arquivo .py
         self.caminho_destino = tk.StringVar()              # Variável para o caminho de destino
 
         # Linha para escolher o arquivo .py
-        tk.Label(master, text="Arquivo Python:").grid(row=0, column=0, sticky="e", padx=5, pady=5)
-        self.entry_arquivo = tk.Entry(master, textvariable=self.caminho_arquivo, width=40)
+        tk.Label(frame_principal, text="Arquivo Python:").grid(row=0, column=0, sticky="e", padx=5, pady=5)
+        self.entry_arquivo = tk.Entry(frame_principal, textvariable=self.caminho_arquivo, width=40)
         self.entry_arquivo.grid(row=0, column=1, padx=5, pady=5)
-        tk.Button(master, text="🔍", command=self.selecionar_arquivo).grid(row=0, column=2, padx=5, pady=5)
+        tk.Button(frame_principal, text="🔍", command=self.selecionar_arquivo).grid(row=0, column=2, padx=5, pady=5)
 
         # Linha para escolher o destino
-        tk.Label(master, text="Destino do Executável:").grid(row=1, column=0, sticky="e", padx=5, pady=5)
-        self.entry_destino = tk.Entry(master, textvariable=self.caminho_destino, width=40)
+        tk.Label(frame_principal, text="Destino do Executável:").grid(row=1, column=0, sticky="e", padx=5, pady=5)
+        self.entry_destino = tk.Entry(frame_principal, textvariable=self.caminho_destino, width=40)
         self.entry_destino.grid(row=1, column=1, padx=5, pady=5)
-        tk.Button(master, text="🔍", command=self.selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
+        tk.Button(frame_principal, text="🔍", command=self.selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
 
         # Botão de compilar
-        self.btn_compilar = tk.Button(master, text="Compilar", command=self.iniciar_compilacao)
+        self.btn_compilar = tk.Button(frame_principal, text="Compilar", command=self.iniciar_compilacao)
         self.btn_compilar.grid(row=2, column=1, pady=10)
 
         # Barra de progresso
-        self.progress = ttk.Progressbar(master, orient="horizontal", length=400, mode="determinate")
+        self.progress = ttk.Progressbar(frame_principal, orient="horizontal", length=400, mode="determinate")
         self.progress.grid(row=3, column=0, columnspan=3, padx=5, pady=5)
 
         # Caixa de texto para logs
-        self.texto_log = tk.Text(master, height=10, width=60)
+        self.texto_log = tk.Text(frame_principal, height=10, width=60)
         self.texto_log.grid(row=4, column=0, columnspan=3, padx=5, pady=5)
+
+        # Caixa de instruções de uso no frame lateral
+        label_ajuda = tk.Label(frame_ajuda, text="Como utilizar o programa:", font=("Arial", 10, "bold"))
+        label_ajuda.pack(pady=(10, 5))
+        texto_ajuda = (
+            "1. Clique na lupa ao lado de 'Arquivo Python' e selecione o arquivo .py que deseja compilar.\n\n"
+            "2. Clique na lupa ao lado de 'Destino do Executável' e escolha a pasta onde o executável será salvo.\n\n"
+            "3. Clique em 'Compilar' para iniciar o processo.\n\n"
+            "4. Acompanhe o progresso e os logs na tela.\n\n"
+            "5. Ao finalizar, uma mensagem será exibida informando o sucesso ou erro da operação."
+        )
+        ajuda_box = tk.Message(frame_ajuda, text=texto_ajuda, width=250)
+        ajuda_box.pack(padx=10, pady=10)
+
+        # Label com o nome do idealizador
+        label_autor = tk.Label(frame_ajuda, text="Idealizado por: Rivaldo", font=("Arial", 9, "italic"))  # Adiciona a label do autor
+        label_autor.pack(side=tk.BOTTOM, pady=10)  # Posiciona no final do frame de ajuda
 
     def selecionar_arquivo(self):
         arquivo = filedialog.askopenfilename(
@@ -72,6 +99,7 @@ class CompiladorApp:
         comando = [
             'pyinstaller',
             '--onefile',
+            '--noconsole',  # Adiciona esta linha para não abrir o console (janela preta)
             '--distpath', pasta_destino,
             arquivo_py
         ]
@@ -79,12 +107,18 @@ class CompiladorApp:
         self.log(f"Destino: {pasta_destino}")
         self.progress["value"] = 10                       # Atualiza a barra de progresso
 
-        # Executa o comando e captura a saída em tempo real
+        # Executa o comando e captura a saída em tempo real, ocultando a janela preta no Windows
+        startupinfo = None                                # Define startupinfo como None por padrão
+        if sys.platform == "win32":                       # Se estiver no Windows
+            startupinfo = subprocess.STARTUPINFO()        # Cria um objeto STARTUPINFO
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # Define a flag para não mostrar a janela
+
         processo = subprocess.Popen(
             comando,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True
+            text=True,
+            startupinfo=startupinfo                       # Usa startupinfo para ocultar a janela no Windows
         )
 
         for linha in processo.stdout:

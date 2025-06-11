@@ -1,8 +1,8 @@
 ('D:\\Documentos\\programa final python\\meu_programa.exe',
- True,
  False,
  False,
- 'D:\\Documentos\\Compilador_Python\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-console.ico',
+ False,
+ 'D:\\Documentos\\Compilador_Python\\Lib\\site-packages\\PyInstaller\\bootloader\\images\\icon-windowed.ico',
  None,
  False,
  False,
@@ -104,9 +104,9 @@
  [],
  False,
  False,
- 1749651510,
- [('run.exe',
-   'D:\\Documentos\\Compilador_Python\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
+ 1749653304,
+ [('runw.exe',
+   'D:\\Documentos\\Compilador_Python\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],
  'C:\\Program '
  'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\python311.dll')

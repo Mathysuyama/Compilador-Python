@@ -1,2 +1,2 @@
+pyinstaller>=5.0
 tk
-pyinstaller==5.13.2

@@ -1,6 +1,5 @@
 import tkinter as tk  # Importa o Tkinter para criar a interface gráfica
 from tkinter import filedialog  # Importa o filedialog para abrir janelas de seleção de arquivos
-import subprocess  # Importa subprocess para executar comandos do sistema
 
 # Cria a janela principal
 root = tk.Tk()
@@ -36,25 +35,6 @@ tk.Button(root, text="🔍", command=selecionar_arquivo).grid(row=0, column=2, p
 tk.Label(root, text="Destino do Executável:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
 tk.Entry(root, textvariable=caminho_destino, width=40).grid(row=1, column=1, padx=5, pady=5)
 tk.Button(root, text="🔍", command=selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
-
-# Função para compilar o arquivo Python selecionado
-def compilar():
-    arquivo = caminho_arquivo.get()      # Obtém o caminho do arquivo .py
-    destino = caminho_destino.get()      # Obtém o caminho da pasta de destino
-    if not arquivo or not destino:
-        tk.messagebox.showerror("Erro", "Selecione o arquivo Python e o destino!")  # Mostra erro se faltar algum campo
-        return
-    comando = [
-        "pyinstaller",
-        "--onefile",
-        "--noconsole",                   # Não abre janela preta ao executar o .exe gerado
-        "--distpath", destino,           # Define a pasta de destino do executável
-        arquivo
-    ]
-    subprocess.run(comando)              # Executa o comando do PyInstaller
-
-# Botão para compilar
-tk.Button(root, text="Compilar", command=compilar).grid(row=2, column=1, pady=15)
 
 # Inicia o loop principal da interface
 root.mainloop()

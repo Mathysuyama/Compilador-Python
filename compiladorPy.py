@@ -6,6 +6,7 @@ from tkinter import messagebox   # Importa o messagebox para mostrar diálogos d
 import threading                 # Importa threading para rodar a compilação em paralelo à interface
 import sys                       # Importa sys para acessar informações do sistema operacional
 import os                        # Importa os para manipulação de caminhos
+import shutil                    # Importa shutil para verificar se pyinstaller está no PATH
 
 class CompiladorApp:
     def __init__(self, master):
@@ -80,7 +81,25 @@ class CompiladorApp:
         if pasta:
             self.caminho_destino.set(pasta)               # Atualiza o caminho de destino na caixa de texto
 
+    def instalar_pyinstaller():
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
+            return True
+        except Exception as e:
+            messagebox.showerror("Erro", f"Não foi possível instalar o PyInstaller automaticamente.\nErro: {e}")
+            return False
+
     def iniciar_compilacao(self):
+        if not shutil.which("pyinstaller"):
+            resposta = messagebox.askyesno(
+                "PyInstaller não encontrado",
+                "PyInstaller não está instalado. Deseja instalar automaticamente?"
+            )
+            if resposta:
+                if not instalar_pyinstaller():
+                    return
+            else:
+                return
         # Desabilita o botão para evitar múltiplos cliques
         self.btn_compilar.config(state="disabled")
         self.progress["value"] = 0                        # Reseta a barra de progresso

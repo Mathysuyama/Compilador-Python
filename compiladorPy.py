@@ -81,32 +81,8 @@ class CompiladorApp:
         if pasta:
             self.caminho_destino.set(pasta)               # Atualiza o caminho de destino na caixa de texto
 
-    def instalar_pyinstaller(self):  # Corrige: adiciona self como primeiro parâmetro
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
-            return True
-        except Exception as e:
-            messagebox.showerror("Erro", f"Não foi possível instalar o PyInstaller automaticamente.\nErro: {e}")
-            return False
 
-    def iniciar_compilacao(self):
-        if not shutil.which("pyinstaller"):
-            if not shutil.which("pip") or not sys.executable:
-                messagebox.showerror(
-                    "Ambiente não suportado",
-                    "Python e pip não foram encontrados no sistema.\n"
-                    "Instale o Python e o PyInstaller manualmente para usar este compilador."
-                )
-                return
-            resposta = messagebox.askyesno(
-                "PyInstaller não encontrado",
-                "PyInstaller não está instalado. Deseja instalar automaticamente?"
-            )
-            if resposta:
-                if not self.instalar_pyinstaller():  # Corrige: chama com self.
-                    return
-            else:
-                return
+
         # Desabilita o botão para evitar múltiplos cliques
         self.btn_compilar.config(state="disabled")
         self.progress["value"] = 0                        # Reseta a barra de progresso

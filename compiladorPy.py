@@ -41,8 +41,9 @@ tk.Entry(root, textvariable=caminho_destino, width=40).grid(row=1, column=1, pad
 tk.Button(root, text="🔍", command=selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
 
 # Barra de progresso
-progress = ttk.Progressbar(root, orient="horizontal", length=400, mode="indeterminate")
+progress = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate")  # Modo determinate
 progress.grid(row=3, column=0, columnspan=3, padx=5, pady=10)
+progress["value"] = 0  # Garante que a barra inicia zerada e sem cor
 
 # Caixa de texto para logs
 log_text = tk.Text(root, height=8, width=60)
@@ -62,21 +63,27 @@ def compilar():
         "--distpath", destino,           # Define a pasta de destino do executável
         arquivo
     ]
-    progress.start()                     # Inicia a barra de progresso
-    log_text.delete(1.0, tk.END)         # Limpa o log
+    progress["value"] = 0           # Garante que a barra inicia zerada ao compilar
+    progress.config(mode="indeterminate")  # Muda para animada só durante a compilação
+    progress.start()                # Inicia a barra de progresso
+    log_text.delete(1.0, tk.END)    # Limpa o log
     try:
         processo = subprocess.Popen(comando, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         for linha in processo.stdout:
             log_text.insert(tk.END, linha)
             log_text.see(tk.END)
         processo.wait()
-        progress.stop()                  # Para a barra de progresso
+        progress.stop()             # Para a barra de progresso
+        progress.config(mode="determinate")  # Volta para determinate (sem cor)
+        progress["value"] = 0       # Zera a barra novamente
         if processo.returncode == 0:
             messagebox.showinfo("Sucesso", "Compilação finalizada com sucesso!")  # Mostra mensagem de sucesso
         else:
             messagebox.showerror("Erro", "Ocorreu um erro durante a compilação.") # Mostra mensagem de erro
     except Exception as e:
         progress.stop()
+        progress.config(mode="determinate")
+        progress["value"] = 0
         messagebox.showerror("Erro", f"Ocorreu um erro: {e}")
 
 # Função para rodar a compilação em thread

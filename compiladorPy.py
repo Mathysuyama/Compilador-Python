@@ -8,6 +8,7 @@ import threading   # Importa threading para não travar a interface
 # Cria a janela principal
 root = tk.Tk()
 root.title("Compilador Python para Executável")  # Define o título da janela
+root.iconbitmap("python.ico")  # Define o ícone da janela para o emblema do Python
 
 # Variáveis para armazenar os caminhos selecionados
 caminho_arquivo = tk.StringVar()   # Caminho do arquivo .py

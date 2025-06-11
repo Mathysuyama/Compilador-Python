@@ -4,44 +4,26 @@ import subprocess
 import threading
 import os
 
-# Função para criar gradiente no fundo
-def gradiente(canvas, cor1, cor2):
-    largura = canvas.winfo_width()
-    altura = canvas.winfo_height()
-    steps = altura
-    r1, g1, b1 = canvas.winfo_rgb(cor1)
-    r2, g2, b2 = canvas.winfo_rgb(cor2)
-    r_ratio = float(r2 - r1) / steps
-    g_ratio = float(g2 - g1) / steps
-    b_ratio = float(b2 - b1) / steps
-    for i in range(steps):
-        nr = int(r1 + (r_ratio * i))
-        ng = int(g1 + (g_ratio * i))
-        nb = int(b1 + (b_ratio * i))
-        cor = f'#{nr//256:02x}{ng//256:02x}{nb//256:02x}'
-        canvas.create_line(0, i, largura, i, fill=cor)
-
 # Cria a janela principal
 root = tk.Tk()
 root.title("Compilador Python para Executável")
+root.geometry("900x450")  # Tamanho fixo (ajuste se quiser maior/menor)
+root.resizable(False, False)  # Impede redimensionamento
 
 # Define o ícone da janela para o emblema do Python (usa caminho absoluto para evitar erro)
 icon_path = os.path.join(os.path.dirname(__file__), "python.ico")
 if os.path.exists(icon_path):
     root.iconbitmap(icon_path)
 
-# Cria um canvas para o gradiente de fundo
-canvas = tk.Canvas(root, width=700, height=400, highlightthickness=0)
-canvas.pack(fill="both", expand=True)
-root.update()
-gradiente(canvas, "#306998", "#4B8BBE")  # Azul gradiente igual ao ícone do Python
+# Cor sólida de fundo (azul Python)
+root.configure(bg="#306998")
 
-# Frame principal transparente sobre o canvas
-frame_principal = tk.Frame(canvas, bg="", highlightthickness=0)
-frame_principal.place(relx=0.02, rely=0.05)
+# Coloque os frames sobre o root, não como filhos do canvas
+frame_principal = tk.Frame(root, bg="#306998", highlightthickness=0, width=600, height=400)
+frame_principal.place(x=20, y=20)
 
-frame_ajuda = tk.Frame(canvas, relief=tk.GROOVE, borderwidth=2, bg="#f5f5f5")
-frame_ajuda.place(relx=0.62, rely=0.05)
+frame_ajuda = tk.Frame(root, relief=tk.GROOVE, borderwidth=2, bg="#f5f5f5", width=260, height=400)
+frame_ajuda.place(x=620, y=20)
 
 # Variáveis para armazenar os caminhos selecionados
 caminho_arquivo = tk.StringVar()
@@ -63,12 +45,12 @@ def selecionar_destino():
         caminho_destino.set(pasta)
 
 # Campo e botão para selecionar o arquivo Python
-tk.Label(frame_principal, text="Arquivo Python:", fg="white", font=("Arial", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+tk.Label(frame_principal, text="Arquivo Python:", fg="white", bg="#306998", font=("Arial", 10, "bold")).grid(row=0, column=0, padx=5, pady=5, sticky="e")
 tk.Entry(frame_principal, textvariable=caminho_arquivo, width=40).grid(row=0, column=1, padx=5, pady=5)
 tk.Button(frame_principal, text="🔍", command=selecionar_arquivo, bg="#FFD43B", activebackground="#FFD43B").grid(row=0, column=2, padx=5, pady=5)
 
 # Campo e botão para selecionar a pasta de destino
-tk.Label(frame_principal, text="Destino do Executável:", bg="", fg="white", font=("Arial", 10, "bold")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+tk.Label(frame_principal, text="Destino do Executável:", fg="white", bg="#306998", font=("Arial", 10, "bold")).grid(row=1, column=0, padx=5, pady=5, sticky="e")
 tk.Entry(frame_principal, textvariable=caminho_destino, width=40).grid(row=1, column=1, padx=5, pady=5)
 tk.Button(frame_principal, text="🔍", command=selecionar_destino, bg="#FFD43B", activebackground="#FFD43B").grid(row=1, column=2, padx=5, pady=5)
 

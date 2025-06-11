@@ -4,11 +4,24 @@ from tkinter import messagebox  # Importa messagebox para mostrar mensagens ao u
 from tkinter import ttk         # Importa ttk para a barra de progresso
 import subprocess  # Importa subprocess para executar comandos do sistema
 import threading   # Importa threading para não travar a interface
+import os          # Importa os para manipulação de caminhos
 
 # Cria a janela principal
 root = tk.Tk()
 root.title("Compilador Python para Executável")  # Define o título da janela
-root.iconbitmap("python.ico")  # Define o ícone da janela para o emblema do Python
+
+# Define o ícone da janela para o emblema do Python (usa caminho absoluto para evitar erro)
+icon_path = os.path.join(os.path.dirname(__file__), "python.ico")
+if os.path.exists(icon_path):
+    root.iconbitmap(icon_path)
+
+# Frame principal para os controles do compilador
+frame_principal = tk.Frame(root)
+frame_principal.grid(row=0, column=0, padx=10, pady=10, sticky="n")
+
+# Frame lateral para instruções de uso
+frame_ajuda = tk.Frame(root, relief=tk.GROOVE, borderwidth=2)
+frame_ajuda.grid(row=0, column=1, padx=10, pady=10, sticky="ns")
 
 # Variáveis para armazenar os caminhos selecionados
 caminho_arquivo = tk.StringVar()   # Caminho do arquivo .py
@@ -32,22 +45,22 @@ def selecionar_destino():
         caminho_destino.set(pasta)  # Atualiza o campo com o caminho selecionado
 
 # Campo e botão para selecionar o arquivo Python
-tk.Label(root, text="Arquivo Python:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
-tk.Entry(root, textvariable=caminho_arquivo, width=40).grid(row=0, column=1, padx=5, pady=5)
-tk.Button(root, text="🔍", command=selecionar_arquivo).grid(row=0, column=2, padx=5, pady=5)
+tk.Label(frame_principal, text="Arquivo Python:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+tk.Entry(frame_principal, textvariable=caminho_arquivo, width=40).grid(row=0, column=1, padx=5, pady=5)
+tk.Button(frame_principal, text="🔍", command=selecionar_arquivo).grid(row=0, column=2, padx=5, pady=5)
 
 # Campo e botão para selecionar a pasta de destino
-tk.Label(root, text="Destino do Executável:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
-tk.Entry(root, textvariable=caminho_destino, width=40).grid(row=1, column=1, padx=5, pady=5)
-tk.Button(root, text="🔍", command=selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
+tk.Label(frame_principal, text="Destino do Executável:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
+tk.Entry(frame_principal, textvariable=caminho_destino, width=40).grid(row=1, column=1, padx=5, pady=5)
+tk.Button(frame_principal, text="🔍", command=selecionar_destino).grid(row=1, column=2, padx=5, pady=5)
 
 # Barra de progresso
-progress = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate")  # Modo determinate
+progress = ttk.Progressbar(frame_principal, orient="horizontal", length=400, mode="determinate")  # Modo determinate
 progress.grid(row=3, column=0, columnspan=3, padx=5, pady=10)
 progress["value"] = 0  # Garante que a barra inicia zerada e sem cor
 
 # Caixa de texto para logs
-log_text = tk.Text(root, height=8, width=60)
+log_text = tk.Text(frame_principal, height=8, width=60)
 log_text.grid(row=4, column=0, columnspan=3, padx=5, pady=5)
 
 # Função para compilar o arquivo Python selecionado (em thread)
@@ -92,7 +105,24 @@ def compilar_thread():
     threading.Thread(target=compilar).start()
 
 # Botão para compilar
-tk.Button(root, text="Compilar", command=compilar_thread).grid(row=2, column=1, pady=15)
+tk.Button(frame_principal, text="Compilar", command=compilar_thread).grid(row=2, column=1, pady=15)
+
+# Frame lateral de instruções de uso
+label_ajuda = tk.Label(frame_ajuda, text="Como utilizar o programa:", font=("Arial", 10, "bold"))
+label_ajuda.pack(pady=(10, 5))
+texto_ajuda = (
+    "1. Clique na lupa ao lado de 'Arquivo Python' e selecione o arquivo .py que deseja compilar.\n\n"
+    "2. Clique na lupa ao lado de 'Destino do Executável' e escolha a pasta onde o executável será salvo.\n\n"
+    "3. Clique em 'Compilar' para iniciar o processo.\n\n"
+    "4. Acompanhe o progresso e os logs na tela.\n\n"
+    "5. Ao finalizar, uma mensagem será exibida informando o sucesso ou erro da operação."
+)
+ajuda_box = tk.Message(frame_ajuda, text=texto_ajuda, width=250)
+ajuda_box.pack(padx=10, pady=10)
+
+# Label com o nome do idealizador
+label_autor = tk.Label(frame_ajuda, text="Idealizado por: Rivaldo", font=("Arial", 9, "italic"))
+label_autor.pack(side=tk.BOTTOM, pady=10)
 
 # Inicia o loop principal da interface
 root.mainloop()

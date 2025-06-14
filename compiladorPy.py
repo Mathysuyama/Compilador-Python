@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, ttk
 import subprocess
 import threading
 import os
+import shutil  # Importado para verificar o PyInstaller
 
 # Cria a janela principal
 root = tk.Tk()
@@ -73,6 +74,10 @@ def compilar():
     destino = caminho_destino.get()
     if not arquivo or not destino:
         tk.messagebox.showerror("Erro", "Selecione o arquivo Python e o destino!")
+        return
+    # Verifica se o PyInstaller está disponível
+    if not shutil.which("pyinstaller"):
+        messagebox.showerror("Erro", "PyInstaller não encontrado. Instale com 'pip install pyinstaller'.")
         return
     comando = [
         "pyinstaller",
